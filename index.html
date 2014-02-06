@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+
+        <title>Ansible - Automazione e orchestrazione agile</title>
+
+        <meta name="description" content="Automazione e orchestrazione agile e semplice">
+        <meta name="author" content="Lorenzo Gaggini">
+
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+        <link rel="stylesheet" href="css/reveal.min.css">
+        <link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+        <!-- For syntax highlighting -->
+        <link rel="stylesheet" href="lib/css/zenburn.css">
+
+        <!-- If the query includes 'print-pdf', use the PDF print sheet -->
+        <script>
+            document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+        </script>
+
+        <!--[if lt IE 9]>
+        <script src="lib/js/html5shiv.js"></script>
+        <![endif]-->
+    </head>
+
+    <body>
+
+        <div class="reveal">
+
+            <!-- Any section element inside of this container is displayed as a slide -->
+            <div class="slides">
+                
+                <section data-markdown>
+                    <script type="text/template">
+                    ## Ansible
+                    ### Automazione e orchestrazione agile
+                    #### Libersoft SRL - [www.libersoft.it](http://www.libersoft.it)
+
+                    * Lorenzo Gaggini - [lg@libersoft.it](mailto:lg@libersof.it)
+                    * Matteo Giordano - [mg@libersoft.it](mailto:mg@libersoft.it)
+                    </script>
+                </section>
+                
+                <section>
+                    
+                    <section data-markdown>
+                        <script type="text/template">
+                        ## Caratteristiche 1
+
+                        ### Software libero
+
+                        *   GNU General Public License V3
+
+
+                        ### Multifunzione
+                        
+                        *   orchestratore
+                        *   provisioning di configurazioni
+                        *   deploy di applicazioni
+                        *   API Python
+                        *   Web app Ansible AWX
+
+                        </script>
+                    </section>
+
+                    <section data-markdown>
+                        <script type="text/template">
+                        ## Caratteristiche 2
+                        
+                        ### Infrastruttura minimale
+                        
+                        *   requisiti minimali: python e 4 package (paramiko PyYAML jinja2 httplib2)
+                        *   nessun agente
+                        *   transport ssh (gestione utenti, crittografia e firewall inclusi)
+                        *   supporto a sudo
+                        *   modello push multi-controller
+
+                        </script>
+                    </section>
+
+                    <section data-markdown>
+                        <script type="text/template">
+                        ## Caratteristiche 3
+                        
+                        ### Agile
+                        
+                        *   sintassi pseudonaturale in formato yaml
+                        *   task ordinali
+                        *   ampia libreria di moduli idempotenti
+                        *   json output
+                        *   templating [jinja 2](http://jinja.pocoo.org/)
+
+                        </script>
+                    </section>    
+                    
+                </section>
+                    
+                <section data-markdown>
+                    <script type="text/template">
+                    ## Installazione
+                        
+                    ### Repository
+
+                    Rpm-based from EPEL:
+                    <pre><code data-trim>
+                    $ sudo yum install ansible
+                    </code>
+                    </pre>
+
+                    Deb-based from custom PPA:
+                    <pre><code data-trim>
+                    $ sudo apt-get install ansible
+                    </code>
+                    </pre>
+                    
+                    ### Sorgenti
+                   
+                    <pre><code data-trim>
+                    $ sudo pip install paramiko PyYAML jinja2 httplib2
+                    </code>
+                    </pre>
+
+                    <pre><code data-trim>
+                    $ git clone git://github.com/ansible/ansible.git
+                    $ cd ./ansible
+                    $ source ./hacking/env-setup
+                    </code>
+                    </pre>
+
+                    </script>
+                </section>
+                
+                <section data-markdown>
+                    <script type="text/template">
+                    ## Macchine: inventory
+                   
+                    file ansible_hosts, inventory delle macchine, gruppi e impostazioni
+
+                    <pre><code data-trim>
+                    [datacenter1-webservers]
+                    foo.example.com     ansible_ssh_port=2222 ansible_ssh_user=manager
+                    www[01:50].example.com
+
+                    [datacenter2-webservers]
+                    www.example2.com
+
+                    [data-center1:children]
+                    datacenter1-webservers
+                    datacenter1-dbservers
+
+                    [webservers:children]
+                    datacenter1-webservers
+                    datacenter2-webservers
+
+                    </code>
+                    </pre>
+
+
+                    </script>
+                </section>
+
+                <section data-markdown>
+                        <script type="text/template">
+                        ## Orchestrazione
+                        
+                        *   Trasferimento di file
+                        
+                        <pre><code data-trim>
+                        $ ansible webservers -m copy -a "src=/etc/hosts dest=/tmp/hosts"
+                        </code>
+                        </pre>
+
+                        *   Package
+                        
+                        <pre><code data-trim>
+                        $ ansible webservers -m yum -a "name=httpd state=latest"
+                        </code>
+                        </pre>
+                        
+                        *   Deploy
+                        
+                        <pre><code data-trim>
+                        $ ansible webservers -m git -a "repo=git://foo.example.org/repo.git dest=/srv/myapp version=HEAD"
+                        </code>
+                        </pre>
+                        
+                        *   Servizi
+                        
+                        <pre><code data-trim>
+                        $ ansible webservers -m service -a "name=httpd state=restarted"
+                        </code>
+                        </pre>
+
+                        -m [Ampia disponibilità di moduli](http://docs.ansible.com/modules_by_category.html)
+
+                        </script>
+                </section> 
+                
+                
+                <section>
+                    <section data-markdown>
+                        <script type="text/template">
+                        ## Automazione: playbook 1
+                        
+                        <pre><code data-trim>
+                        - hosts: webservers
+                          vars:
+                            http_port: 80
+                            max_clients: 200
+                            user: ansible
+                            sudo: true
+                          tasks:
+                            - name: ensure apache is at the latest version
+                              yum: pkg=httpd state=latest
+                            - name: write the apache config file
+                              template: src=/srv/httpd.j2 dest=/etc/httpd.conf
+                              notify:
+                                - restart apache
+                            - name: ensure apache is running
+                              service: name=httpd state=started
+                          handlers:
+                            - name: restart apache
+                              service: name=httpd state=restarted
+                        </code>
+                        </pre>
+                        
+                        
+                        <pre><code data-trim>
+                        $ ansible-playbook webservers myplaybook.yml
+                        </code>
+                        </pre>
+
+                        </script>
+                    </section>
+                    
+                    <section data-markdown>
+                        <script type="text/template">
+                        ## Automazione: playbook 2
+                       
+                        ### Templating
+
+                        playbook
+                        <pre><code data-trim>
+                        - vars:
+                          http_port: 80
+                          max_clients: 200
+                        </code>
+                        </pre>
+                        
+                        <pre><code data-trim>
+                        template: src=/srv/httpd.j2 dest=/etc/httpd.conf
+                        </code>
+                        </pre>
+
+                        httpd.j2
+                        <pre><code data-trim>
+                        Listen {{ http_port }}
+                        MaxClients {{ max_clients }}
+                        </code>
+                        </pre>
+
+                        </script>
+                    </section>
+
+                    <section data-markdown>
+                        <script type="text/template">
+                        ## Automazione: playbook 3
+                        
+                        ### Condizioni
+
+                        <pre><code data-trim>
+                        - name: "shutdown Debian flavored systems"
+                          command: /sbin/shutdown -t now
+                          when: ansible_os_family == "Debian"
+                        </code>
+                        </pre>
+
+                        ### Loop
+                        
+                        <pre><code data-trim>
+                        - name: add several users
+                          user: name={{ item.name }} state=present groups=wheel
+                          with_items:
+                            - testuser1
+                            - testuser2
+                        </code>
+                        </pre>
+                        </script>
+                    </section>
+ 
+                    <section data-markdown>
+                        <script type="text/template">
+                        ## Automazione: playbook 4
+                        
+                        ### Error Handling
+
+                        Registrazione di esiti per controlli successivi:
+                        
+                        <pre><code data-trim>
+                        - name: if this command fail register the fail but ignore the error
+                          command: /usr/bin/example-command -x -y -z
+                          register: command_result
+                          ignore_errors: True
+                        </code>
+                        </pre>
+                        
+                        Condizioni di fallimento personalizzabili:
+
+                        <pre><code data-trim>
+                        - name: this command prints FAILED when it fails
+                          command: /usr/bin/example-command -x -y -z
+                          register: command_result
+                          failed_when: "'FAILED' in command_result.stdout"
+                        </code>
+                        </pre>
+
+                        </script>
+                    </section>                   
+                </section>
+                
+                
+                <section>
+                    <section data-markdown>
+                        <script type="text/template">
+                        ## Interfacce 1
+                        
+                        *   API Python
+
+                        <pre><code data-trim>
+                        #!/usr/bin/python
+
+                        import ansible.runner
+                        import sys
+
+                        # construct the ansible runner and execute on all hosts
+                        results = ansible.runner.Runner(
+                            pattern='*', forks=10,
+                            module_name='command', module_args='/usr/bin/uptime',
+                        ).run()
+
+                        if results is None:
+                            print "No hosts found"
+                            sys.exit(1)
+
+                        print "UP ***********"
+                            for (hostname, result) in results['contacted'].items():
+                                if not 'failed' in result:
+                                    print "%s >>> %s" % (hostname, result['stdout'])
+                        </code>
+                        </pre>
+
+                        </script>
+                    </section>
+           
+                    <section data-markdown>
+                        <script type="text/template">
+                        ## Interfacce 2 
+                        
+                        *   Interfaccia web AWX
+                        
+                        <img src="http://cdn2.hubspot.net/hub/330046/file-471802200-png/screenshots/tower_header.png?t=1390335338000">
+                        
+                        [Info](http://www.ansibleworks.com/ansibleworks-awx/)
+                        
+                        </script>
+                    </section>
+                
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                    ## Conclusioni
+
+                    * Una qualsiasi forma di automazione strutturata (Chef, Puppet, Ansible, Salt) è meglio di nessuna automazione.
+
+                    * Ansible fa dei suoi punti di forza:
+                    
+                        *   semplicità
+                        *   infrastruttura minimale
+                        *   curva di apprendimento agevole
+                        *   multifunzionalità (orchestrazione e automazione)
+
+                    </script>
+                </section>
+
+            </div>
+
+        </div>
+
+        <script src="lib/js/head.min.js"></script>
+        <script src="js/reveal.min.js"></script>
+
+        <script>
+
+            // Full list of configuration options available here:
+            // https://github.com/hakimel/reveal.js#configuration
+            Reveal.initialize({
+                controls: true,
+                progress: true,
+                history: true,
+                center: true,
+
+                theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+                transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+                // Parallax scrolling
+                // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+                // parallaxBackgroundSize: '2100px 900px',
+
+                // Optional libraries used to extend on reveal.js
+                dependencies: [
+                    { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+                    { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                    { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                    { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+                    { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+                    { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+                ]
+            });
+
+        </script>
+
+    </body>
+</html>
